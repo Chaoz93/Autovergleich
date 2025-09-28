@@ -2,227 +2,706 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Autovergleich</title>
   <style>
-    /* === Farben & Layout wie im Handyvergleich === */
-    :root {
+    :root{
       color-scheme: light dark;
       font-family: "Segoe UI", Roboto, sans-serif;
-      --bg: #f4f6fb;
-      --card: #ffffffcc;
-      --primary: #2f59d1;
-      --primary-dark: #1f3d91;
-      --border: #d9dce5;
-      --text-muted: #5e6471;
+      --bg:#f4f6fb; --card:#ffffffcc; --primary:#2f59d1; --primary-dark:#1f3d91;
+      --border:#d9dce5; --text-muted:#5e6471;
     }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(160deg, #e5ecff 0%, #f7f8ff 35%, #ffffff 100%);
-      display: flex;
-      justify-content: center;
-      padding: 32px 16px 64px;
-      color: #1b1f2a;
+    body{margin:0;min-height:100vh;background:linear-gradient(160deg,#e5ecff 0%,#f7f8ff 35%,#fff 100%);
+      display:flex;justify-content:center;padding:32px 16px 64px;color:#1b1f2a;}
+    main{width:min(2100px,100%);display:grid;gap:32px;}
+    header h1{margin:0;font-size:clamp(2.1rem,1.5rem+1.8vw,2.8rem);font-weight:700;}
+    header p{margin:8px 0 0;color:var(--text-muted);max-width:720px;}
+    .card{background:var(--card);backdrop-filter:blur(16px);border-radius:20px;
+      box-shadow:0 24px 50px -28px rgba(47,89,209,.4);border:1px solid var(--border);padding:24px;}
+    .section-actions{display:flex;justify-content:flex-end;gap:12px;margin-bottom:12px;}
+    button{border:none;border-radius:14px;padding:12px 18px;font-size:1rem;font-weight:600;cursor:pointer;
+      background:var(--primary);color:#fff;transition:transform .15s,box-shadow .2s,background .2s;}
+    button:hover{transform:translateY(-2px);box-shadow:0 14px 28px -18px var(--primary);background:var(--primary-dark);}
+    .button-secondary{background:#e1e4eb;color:#1b1f2a;box-shadow:none;}
+    .button-secondary:hover{background:#c9ceda}
+    .button-ghost{background:transparent;color:var(--primary);border:1px solid rgba(47,89,209,.6)}
+    .button-danger{background:rgba(198,40,40,.12);color:#8c1d1d;border:1px solid rgba(198,40,40,.35)}
+    form{display:grid;gap:16px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:720px){
+      .grid.two{grid-template-columns:repeat(2,1fr)}
+      .grid.three{grid-template-columns:repeat(3,1fr)}
+      .grid.four{grid-template-columns:repeat(4,1fr)}
     }
-    main {
-      width: min(2100px, 100%);
-      display: grid;
-      gap: 32px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: clamp(2.1rem, 1.5rem + 1.8vw, 2.8rem);
-      font-weight: 700;
-    }
-    header p {
-      margin: 8px 0 0;
-      color: var(--text-muted);
-      max-width: 720px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 24px 50px -28px rgba(47, 89, 209, 0.4);
-      border: 1px solid var(--border);
-    }
-    form { display: grid; gap: 16px; }
-    .grid { display: grid; gap: 16px; }
-    @media (min-width: 720px) {
-      .grid.two { grid-template-columns: repeat(2, 1fr); }
-      .grid.three { grid-template-columns: repeat(3, 1fr); }
-      .grid.four { grid-template-columns: repeat(4, 1fr); }
-    }
-    label { display: grid; gap: 6px; font-weight: 600; font-size: 0.95rem; }
-    input, select {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      font-size: 1rem;
-    }
-    button {
-      border: none;
-      border-radius: 14px;
-      padding: 12px 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      background: var(--primary);
-      color: white;
-    }
-    button:hover { background: var(--primary-dark); }
-    .button-secondary { background: #e1e4eb; color: #1b1f2a; }
-    .empty { padding: 32px; text-align: center; color: var(--text-muted); }
-    .table-wrapper { overflow-x: auto; padding: 12px 16px; }
-    .comparison-table { display: flex; flex-direction: column; gap: 0; }
-    .table-row { display: grid; grid-template-columns: repeat(8, 1fr); column-gap: 16px; }
-    .table-row.table-header { border-bottom: 1px solid var(--border); font-size: 0.8rem; font-weight: 700; }
-    .cell { padding: 6px; font-size: 0.95rem; }
-    .highlight { background: rgba(47, 89, 209, 0.1); }
+    label{display:grid;gap:6px;font-weight:600;font-size:.95rem}
+    input,select{padding:10px 12px;border-radius:12px;border:1px solid var(--border);font-size:1rem}
+    input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(47,89,209,.2)}
+    .table-wrapper{overflow-x:auto;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.55)}
+    .comparison-table{display:flex;flex-direction:column;width:100%}
+    .table-row{display:grid;grid-template-columns:
+        minmax(260px,2.2fr)
+        minmax(140px,1.1fr)
+        minmax(110px,.9fr)
+        minmax(110px,.9fr)
+        minmax(110px,.9fr)
+        minmax(110px,.9fr)
+        minmax(130px,1fr)
+        minmax(140px,1fr);
+      column-gap:16px;align-items:center}
+    .table-row.table-header{padding-bottom:12px;border-bottom:1px solid var(--border)}
+    .table-row.table-header .cell{font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted)}
+    .table-body .table-row{padding:16px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s,box-shadow .2s}
+    .table-body .table-row:last-child{border-bottom:none}
+    .table-row.selectable:hover{background:rgba(47,89,209,.06)}
+    .table-row.highlight:not(.selected){background:rgba(47,89,209,.08)}
+    .table-row.selected{outline:2px solid var(--primary);outline-offset:-2px;background:rgba(47,89,209,.12)}
+    .cell{display:flex;align-items:center;padding:0 8px;min-height:44px;font-size:.95rem;line-height:1.4}
+    .provider-stack{display:flex;flex-direction:column;gap:4px}
+    .provider-stack .name{font-weight:700;font-size:1rem}
+    .tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:rgba(47,89,209,.12);
+      color:var(--primary-dark);padding:4px 10px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+    .icon-button{width:34px;height:34px;border-radius:10px;border:1px solid rgba(47,89,209,.2);background:rgba(47,89,209,.12);
+      color:var(--primary-dark);display:inline-flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer}
+    .icon-button--delete{background:rgba(198,40,40,.12);border-color:rgba(198,40,40,.35);color:#8c1d1d}
+    .details-button{width:36px;height:36px;border-radius:999px;border:none;background:rgba(47,89,209,.12);color:var(--primary-dark);
+      display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;position:relative}
+    .details-button[data-tooltip]:hover::before{content:'';position:absolute;top:calc(100% + 6px);right:14px;width:10px;height:10px;
+      background:#111827;transform:rotate(45deg);box-shadow:0 12px 24px -16px rgba(17,24,39,.65)}
+    .details-button[data-tooltip]:hover::after{content:attr(data-tooltip);position:absolute;top:calc(100% + 10px);right:-4px;
+      background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-size:.75rem;line-height:1.35;white-space:pre-line;min-width:220px}
+    .table-controls{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:8px}
+    .table-controls label{font-weight:600;font-size:.85rem;color:var(--text-muted)}
+    .summary{display:grid;gap:16px}
+    .summary-item{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-radius:16px;background:rgba(47,89,209,.08);font-weight:600}
+    .empty{padding:32px;text-align:center;color:var(--text-muted)}
+    .hidden{display:none!important}
+    /* selection card */
+    .selected{display:grid;gap:16px;padding:20px;border-radius:18px;border:1px solid rgba(47,89,209,.25);background:rgba(47,89,209,.1)}
+    .selected h3{margin:0 0 4px}
+    .selected-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+    .slabel{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted)}
+    .sval{font-size:1.1rem;font-weight:600}
+    .selected a{font-weight:600;color:var(--primary);text-decoration:none}
+    .selected a::after{content:'↗';font-size:.85rem;margin-left:4px}
+    /* modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(16,23,48,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal{background:#fff;border-radius:18px;width:min(560px,100%);max-height:90vh;overflow:hidden;box-shadow:0 24px 60px -28px rgba(17,24,39,.6);color:#1b1f2a}
+    .modal header{padding:20px 24px 12px;border-bottom:1px solid var(--border)}
+    .modal .modal-body{padding:20px 24px;display:grid;gap:16px}
+    .modal .modal-footer{padding:16px 24px 20px;background:rgba(244,246,251,.8);display:flex;justify-content:flex-end;gap:12px}
+    .modal textarea{min-height:120px;resize:vertical;padding:12px;border-radius:12px;border:1px solid var(--border);font-size:.95rem;font-family:inherit}
+    .error-message{color:#c62828;background:rgba(198,40,40,.12);padding:10px 14px;border-radius:12px;font-size:.9rem}
+    .import-preview{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .import-preview table{width:100%;border-collapse:collapse}
+    .import-preview th,.import-preview td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.95rem}
+    .import-preview th{background:rgba(47,89,209,.08);text-align:left;font-weight:600;color:var(--text-muted)}
+    .import-preview .entry-header td{background:rgba(47,89,209,.12);font-weight:600;color:var(--primary)}
   </style>
 </head>
 <body>
-  <main>
-    <header>
-      <h1>Autovergleich</h1>
-      <p>Vergleiche Fahrzeuge anhand von Preis, Laufleistung, Erstzulassung und weiteren Kriterien.</p>
-    </header>
+<main>
+  <header>
+    <h1>Autovergleich</h1>
+    <p>Vergleiche Inserate nach Preis, Kilometerstand, Erstzulassung, Leistung und Features. Importiere mehrere Angebote per TSV oder trage sie manuell ein.</p>
+  </header>
 
-    <!-- Formular -->
-    <section class="card">
-      <h2>Fahrzeug hinzufügen</h2>
-      <form id="car-form">
-        <div class="grid two">
-          <label>
-            Händler / Plattform
-            <input type="text" name="dealer" placeholder="z.B. mobile.de" required />
-          </label>
-          <label>
-            Modell
-            <input type="text" name="model" placeholder="z.B. VW Polo 1.0 TSI" required />
-          </label>
-        </div>
-        <div class="grid four">
-          <label>
-            Preis (€)
-            <input type="number" name="price" step="0.01" min="0" required />
-          </label>
-          <label>
-            Erstzulassung (YYYY-MM)
-            <input type="text" name="registration" placeholder="2020-05" />
-          </label>
-          <label>
-            Kilometerstand
-            <input type="number" name="mileage" min="0" step="1000" />
-          </label>
-          <label>
-            Leistung (PS)
-            <input type="number" name="power" min="0" />
-          </label>
-        </div>
-        <div class="grid two">
-          <label>
-            Getriebe
-            <select name="gearbox">
-              <option value="Manuell">Manuell</option>
-              <option value="Automatik">Automatik</option>
-            </select>
-          </label>
-          <label>
-            Verbrauch (l/100km)
-            <input type="number" name="consumption" min="0" step="0.1" />
-          </label>
-        </div>
-        <div class="grid two">
-          <label>
-            Fahrzeugklasse
-            <input type="text" name="class" placeholder="Kleinwagen, Kompakt…" />
-          </label>
-          <label>
-            Inserat-Link
-            <input type="url" name="link" placeholder="https://…" />
-          </label>
-        </div>
-        <div>
-          <label>
-            Extras / Notizen
-            <input type="text" name="notes" placeholder="z.B. Klimaautomatik, LED" />
-          </label>
-        </div>
-        <button type="submit">Fahrzeug speichern</button>
-      </form>
-    </section>
-
-    <!-- Übersicht -->
-    <section class="card">
-      <h2>Überblick</h2>
-      <div id="overview">
-        <p class="empty">Noch keine Fahrzeuge eingetragen.</p>
+  <section class="card">
+    <div class="section-actions">
+      <button id="export-cars" type="button" class="button-secondary">📤 Exportieren</button>
+      <button id="open-import" type="button">📥 Importieren</button>
+    </div>
+    <h2>Fahrzeug hinzufügen</h2>
+    <form id="car-form">
+      <div class="grid two">
+        <label>Händler / Plattform
+          <input type="text" name="dealer" placeholder="z.B. mobile.de" required />
+        </label>
+        <label>Modell / Variante
+          <input type="text" name="model" placeholder="z.B. VW Polo 1.0 TSI" required />
+        </label>
       </div>
+
+      <div class="grid four">
+        <label>Preis (€)
+          <input type="number" name="price" step="0.01" min="0" required />
+        </label>
+        <label>Erstzulassung (YYYY-MM)
+          <input type="text" name="registration" placeholder="2020-05" />
+        </label>
+        <label>Kilometerstand
+          <input type="number" name="mileage" min="0" step="1000" />
+        </label>
+        <label>Leistung (PS)
+          <input type="number" name="power" min="0" />
+        </label>
+      </div>
+
+      <div class="grid three">
+        <label>Getriebe
+          <select name="gearbox">
+            <option value="">—</option>
+            <option>Manuell</option>
+            <option>Automatik</option>
+          </select>
+        </label>
+        <label>Verbrauch (l/100km)
+          <input type="number" name="consumption" min="0" step="0.1" />
+        </label>
+        <label>Fahrzeugklasse
+          <input type="text" name="class" placeholder="Kleinwagen, Kompakt…" />
+        </label>
+      </div>
+
+      <div class="grid two">
+        <label>Inserat-Link
+          <input type="url" name="link" placeholder="https://…" />
+        </label>
+        <label>Extras / Notizen
+          <input type="text" name="notes" placeholder="z.B. Klimaautomatik, LED, Kamera" />
+        </label>
+      </div>
+
+      <div class="form-actions" style="display:flex;justify-content:flex-end;gap:12px;margin-top:8px;">
+        <button type="button" class="button-secondary hidden" id="cancel-edit">Abbrechen</button>
+        <button type="submit" id="submit-button">Fahrzeug speichern</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Überblick</h2>
+    <div id="overview"><p class="empty">Noch keine Fahrzeuge eingetragen.</p></div>
+  </section>
+</main>
+
+<!-- Import-Modal -->
+<div id="import-overlay" class="modal-overlay hidden">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="import-title">
+    <header><h3 id="import-title">Inserate importieren</h3></header>
+    <div class="modal-body">
+      <div>
+        <label for="import-textarea" style="display:block;font-weight:600;margin-bottom:8px;">Importstring (TSV)</label>
+        <textarea id="import-textarea" placeholder="Händler\tModell\tPreis\tEZ\tKM\tPS\tGetriebe\tVerbrauch\tKlasse\tLink\tNotizen"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button type="button" id="import-preview">Preview anzeigen</button>
+      </div>
+      <p id="import-error" class="error-message hidden"></p>
+      <div class="import-preview hidden" id="import-preview-wrapper">
+        <table>
+          <thead><tr><th>Feldname</th><th>Wert</th></tr></thead>
+          <tbody id="import-preview-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="button-secondary" id="import-cancel">Abbrechen</button>
+      <button type="button" id="import-confirm" disabled>Import übernehmen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Templates -->
+<template id="table-template">
+  <div class="grid">
+    <div class="summary">
+      <div class="summary-item"><span>Günstigster Preis</span><span id="lowest-price"></span></div>
+      <div class="summary-item"><span>Niedrigster Kilometerstand</span><span id="lowest-km"></span></div>
+      <div class="summary-item"><span>Durchschnittlicher Preis</span><span id="avg-price"></span></div>
+    </div>
+
+    <section id="selected-box" class="selected hidden">
+      <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+          <h3 id="sel-title"></h3>
+          <p id="sel-sub" style="margin:0;color:var(--text-muted)"></p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end;">
+          <button type="button" id="selected-update">Bearbeiten</button>
+          <button type="button" class="button-secondary" id="selected-clear">Clear</button>
+        </div>
+      </div>
+      <div class="selected-grid">
+        <div><div class="slabel">Preis</div><div class="sval" id="sel-price"></div></div>
+        <div><div class="slabel">Kilometer</div><div class="sval" id="sel-km"></div></div>
+        <div><div class="slabel">Erstzulassung</div><div class="sval" id="sel-ez"></div></div>
+        <div><div class="slabel">Leistung</div><div class="sval" id="sel-ps"></div></div>
+        <div><div class="slabel">Verbrauch</div><div class="sval" id="sel-cons"></div></div>
+        <div><div class="slabel">Preis / km</div><div class="sval" id="sel-ppkm"></div></div>
+      </div>
+      <div><a id="sel-link" href="#" target="_blank" rel="noopener"></a></div>
+      <p id="sel-notes" style="margin:0"></p>
     </section>
-  </main>
 
-  <script>
-    const form = document.getElementById('car-form');
-    const overview = document.getElementById('overview');
-    const STORAGE_KEY = 'autovergleich-cars';
-    let cars = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    <div class="table-controls">
+      <label for="sort-select">Sortieren nach</label>
+      <select id="sort-select">
+        <option value="price-asc">Preis (aufsteigend)</option>
+        <option value="price-desc">Preis (absteigend)</option>
+        <option value="km-asc">KM (aufsteigend)</option>
+        <option value="km-desc">KM (absteigend)</option>
+        <option value="ez-new">Erstzulassung (neu → alt)</option>
+        <option value="ez-old">Erstzulassung (alt → neu)</option>
+        <option value="ps-desc">Leistung (absteigend)</option>
+        <option value="ps-asc">Leistung (aufsteigend)</option>
+        <option value="ppkm-asc">Preis / km (aufsteigend)</option>
+        <option value="ppkm-desc">Preis / km (absteigend)</option>
+        <option value="dealer-asc">Händler (A–Z)</option>
+        <option value="dealer-desc">Händler (Z–A)</option>
+        <option value="created">Eingabereihenfolge</option>
+      </select>
+    </div>
 
-    function saveCars() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
+    <div class="table-wrapper">
+      <div class="comparison-table" role="table" aria-label="Autovergleich">
+        <div class="table-row table-header" role="row">
+          <div class="cell" role="columnheader">Händler &amp; Modell</div>
+          <div class="cell" role="columnheader">Klasse</div>
+          <div class="cell" role="columnheader">Preis</div>
+          <div class="cell" role="columnheader">KM</div>
+          <div class="cell" role="columnheader">EZ</div>
+          <div class="cell" role="columnheader">PS</div>
+          <div class="cell" role="columnheader">Preis / km</div>
+          <div class="cell" role="columnheader">Details &amp; Aktionen</div>
+        </div>
+        <div id="car-table" class="table-body" role="rowgroup"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="row-template">
+  <div class="table-row" role="row">
+    <div class="cell" role="cell">
+      <div class="provider-stack">
+        <strong class="name"></strong>
+        <span class="tag data"></span>
+      </div>
+    </div>
+    <div class="cell class" role="cell"></div>
+    <div class="cell price" role="cell"></div>
+    <div class="cell km" role="cell"></div>
+    <div class="cell ez" role="cell"></div>
+    <div class="cell ps" role="cell"></div>
+    <div class="cell ppkm" role="cell"></div>
+    <div class="cell" role="cell" style="display:flex;gap:10px;align-items:center;">
+      <button type="button" class="details-button" aria-label="Details anzeigen"><span aria-hidden="true">ℹ️</span></button>
+      <button type="button" class="icon-button edit-button" aria-label="Bearbeiten"><span aria-hidden="true">✏️</span></button>
+      <button type="button" class="icon-button icon-button--delete delete-button" aria-label="Löschen"><span aria-hidden="true">🗑️</span></button>
+    </div>
+  </div>
+</template>
+
+<script>
+/* === Helpers / i18n === */
+const euro = new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'});
+const intFmt = new Intl.NumberFormat('de-DE');
+const STORAGE_KEY='autovergleich-items';
+const SORT_STORAGE_KEY='autovergleich-sort';
+const SORT_DEFAULT='price-asc';
+const VALID_SORTS=new Set(['price-asc','price-desc','km-asc','km-desc','ez-new','ez-old','ps-desc','ps-asc','ppkm-asc','ppkm-desc','dealer-asc','dealer-desc','created']);
+
+/* === Elements === */
+const form=document.getElementById('car-form');
+const overview=document.getElementById('overview');
+const tableTemplate=document.getElementById('table-template');
+const rowTemplate=document.getElementById('row-template');
+const exportBtn=document.getElementById('export-cars');
+
+const importOpen=document.getElementById('open-import');
+const importOverlay=document.getElementById('import-overlay');
+const importTA=document.getElementById('import-textarea');
+const importPreviewBtn=document.getElementById('import-preview');
+const importPreviewWrapper=document.getElementById('import-preview-wrapper');
+const importPreviewBody=document.getElementById('import-preview-body');
+const importErr=document.getElementById('import-error');
+const importCancel=document.getElementById('import-cancel');
+const importConfirm=document.getElementById('import-confirm');
+
+/* === Import fields definition (TSV order) === */
+const importFields=[
+  {key:'dealer',label:'Händler/Plattform'},
+  {key:'model',label:'Modell'},
+  {key:'price',label:'Preis (€)'},
+  {key:'registration',label:'Erstzulassung (YYYY-MM)'},
+  {key:'mileage',label:'Kilometerstand'},
+  {key:'power',label:'Leistung (PS)'},
+  {key:'gearbox',label:'Getriebe'},
+  {key:'consumption',label:'Verbrauch (l/100km)'},
+  {key:'class',label:'Fahrzeugklasse'},
+  {key:'link',label:'Inserat-Link'},
+  {key:'notes',label:'Notizen'}
+];
+
+let parsedImport=null;
+
+/* === State === */
+let items=loadItems();
+let editingIndex=null;
+let selectedIndex=null;
+let currentSort=loadSort();
+
+/* === Load / Save === */
+function loadItems(){
+  try{const raw=localStorage.getItem(STORAGE_KEY);const arr=raw?JSON.parse(raw):[];return Array.isArray(arr)?arr:[]}catch{ return [] }
+}
+function saveItems(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(items)); }
+function loadSort(){ try{const s=localStorage.getItem(SORT_STORAGE_KEY);return VALID_SORTS.has(s)?s:SORT_DEFAULT}catch{ return SORT_DEFAULT } }
+function saveSort(s){ try{localStorage.setItem(SORT_STORAGE_KEY,s)}catch{} }
+
+/* === Numeric parsing === */
+const toNum=(v)=>{const s=(v??'').toString().trim().replace(',','.');if(!s) return NaN;const n=Number(s);return Number.isFinite(n)?n:NaN;}
+const toInt=(v)=>{const n=Math.round(toNum(v));return Number.isFinite(n)?n:NaN}
+
+/* === Derived metrics === */
+function enrich(car){
+  const price=toNum(car.price)||0;
+  const km=toInt(car.mileage)||0;
+  const ps=toInt(car.power)||0;
+  const ppkm=(price>0 && km>0)? price/km : NaN;
+  // try to make EZ sortable: YYYY-MM -> numeric YYYYMM
+  const ezStr=(car.registration||'').trim();
+  let ezKey=0, ezPretty='—';
+  if (/^\d{4}-\d{2}$/.test(ezStr)){
+    const [y,m]=ezStr.split('-').map(Number);
+    ezKey=y*100+m;
+    ezPretty=`${String(m).padStart(2,'0')}/${y}`;
+  } else if (/^\d{4}$/.test(ezStr)){
+    ezKey=Number(ezStr)*100+1;
+    ezPretty=`01/${ezStr}`;
+  }
+  return {...car, _price:price, _km:km, _ps:ps, _ppkm:ppkm, _ezKey:ezKey, _ezPretty:ezPretty||'—'};
+}
+
+/* === Sorting === */
+function cmp(a,b,key,dir=1){
+  const va=a[key], vb=b[key];
+  if (Number.isFinite(va)||Number.isFinite(vb)) return ( (va||0)-(vb||0) )*dir;
+  const sa=(a[key]??'').toString(), sb=(b[key]??'').toString();
+  return dir*sa.localeCompare(sb,'de',{sensitivity:'base'});
+}
+function sortEntries(entries,sortKey){
+  if(!VALID_SORTS.has(sortKey)||sortKey==='created') return entries;
+  const s=[...entries];
+  switch(sortKey){
+    case 'price-asc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_price',1)); break;
+    case 'price-desc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_price',-1)); break;
+    case 'km-asc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_km',1)); break;
+    case 'km-desc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_km',-1)); break;
+    case 'ez-new': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_ezKey',-1)); break;
+    case 'ez-old': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_ezKey',1)); break;
+    case 'ps-desc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_ps',-1)); break;
+    case 'ps-asc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_ps',1)); break;
+    case 'ppkm-asc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_ppkm',1)); break;
+    case 'ppkm-desc': s.sort((a,b)=>cmp(a.enriched,b.enriched,'_ppkm',-1)); break;
+    case 'dealer-asc':
+      s.sort((a,b)=> (a.item.dealer||'').localeCompare(b.item.dealer||'','de',{sensitivity:'base'}) || a.index-b.index );
+      break;
+    case 'dealer-desc':
+      s.sort((a,b)=> (b.item.dealer||'').localeCompare(a.item.dealer||'','de',{sensitivity:'base'}) || a.index-b.index );
+      break;
+  }
+  return s;
+}
+
+/* === Render === */
+function render(){
+  overview.innerHTML='';
+  if(!items.length){ overview.innerHTML='<p class="empty">Noch keine Fahrzeuge eingetragen.</p>'; selectedIndex=null; return; }
+
+  if(!VALID_SORTS.has(currentSort)) currentSort=SORT_DEFAULT;
+  if(selectedIndex!==null && (selectedIndex<0 || selectedIndex>=items.length)) selectedIndex=null;
+
+  const entries=items.map((it,idx)=>({item:it,enriched:enrich(it),index:idx}));
+  const sorted=sortEntries(entries,currentSort);
+
+  // summary
+  const frag=tableTemplate.content.cloneNode(true);
+  const tbody=frag.getElementById('car-table');
+  const sortSel=frag.getElementById('sort-select');
+  sortSel.value=currentSort;
+  sortSel.addEventListener('change',e=>{ currentSort=VALID_SORTS.has(e.target.value)?e.target.value:SORT_DEFAULT; saveSort(currentSort); render(); });
+
+  let minPrice={v:Infinity,row:null}, minKm={v:Infinity,row:null}, sumPrice=0;
+
+  sorted.forEach(({item,enriched,index})=>{
+    sumPrice += enriched._price||0;
+    if (enriched._price < minPrice.v){ minPrice={v:enriched._price,row:null}; }
+    if (Number.isFinite(enriched._km) && enriched._km < minKm.v){ minKm={v:enriched._km,row:null}; }
+
+    const row=rowTemplate.content.cloneNode(true);
+    const rowEl=row.querySelector('.table-row');
+    rowEl.classList.add('selectable');
+    if (index===selectedIndex) rowEl.classList.add('selected');
+
+    row.querySelector('.name').textContent=`${item.dealer||'—'} – ${item.model||'Unbekanntes Modell'}`;
+    row.querySelector('.data').textContent=[
+      item.class||'ohne Klasse',
+      item.gearbox||'',
+      item.notes?`• ${item.notes}`:''
+    ].filter(Boolean).join(' · ');
+
+    row.querySelector('.class').textContent=item.class||'—';
+    row.querySelector('.price').textContent=enriched._price?euro.format(enriched._price):'—';
+    row.querySelector('.km').textContent=enriched._km?`${intFmt.format(enriched._km)} km`:'—';
+    row.querySelector('.ez').textContent=enriched._ezPretty||'—';
+    row.querySelector('.ps').textContent=enriched._ps?`${intFmt.format(enriched._ps)} PS`:'—';
+    row.querySelector('.ppkm').textContent=Number.isFinite(enriched._ppkm)?euro.format(enriched._ppkm):'—';
+
+    // details tooltip
+    const detailsBtn=row.querySelector('.details-button');
+    const details=[];
+    if (item.link) details.push('Inserat-Link vorhanden');
+    if (item.gearbox) details.push(`Getriebe: ${item.gearbox}`);
+    if (item.consumption) details.push(`Verbrauch: ${item.consumption} l/100km`);
+    if (item.notes) details.push(item.notes);
+    if (!details.length){
+      detailsBtn.disabled=true;
+      detailsBtn.setAttribute('aria-label','Keine zusätzlichen Details verfügbar');
+    } else {
+      const tip=details.map(d=>'• '+d).join('\n');
+      detailsBtn.dataset.tooltip=tip;
+      detailsBtn.title=details.join('\n');
+      detailsBtn.addEventListener('click',ev=>{
+        ev.stopPropagation();
+        if (ev.metaKey || ev.ctrlKey){ if(item.link) window.open(item.link,'_blank','noopener'); return; }
+        // toggle: select or open link if already selected
+        if (selectedIndex!==index){ selectedIndex=index; render(); return; }
+        if (item.link) window.open(item.link,'_blank','noopener');
+      });
     }
 
-    function render() {
-      overview.innerHTML = '';
-      if (!cars.length) {
-        overview.innerHTML = '<p class="empty">Noch keine Fahrzeuge eingetragen.</p>';
-        return;
-      }
-      const wrapper = document.createElement('div');
-      wrapper.className = 'table-wrapper';
-      const table = document.createElement('div');
-      table.className = 'comparison-table';
-      // Header
-      const header = document.createElement('div');
-      header.className = 'table-row table-header';
-      ['Händler', 'Modell', 'Preis', 'EZ', 'KM', 'PS', 'Getriebe', 'Details'].forEach(h => {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.textContent = h;
-        header.appendChild(cell);
-      });
-      table.appendChild(header);
-      // Rows
-      cars.forEach(car => {
-        const row = document.createElement('div');
-        row.className = 'table-row';
-        [car.dealer, car.model, car.price + ' €', car.registration || '—', 
-         car.mileage ? car.mileage + ' km' : '—',
-         car.power ? car.power + ' PS' : '—',
-         car.gearbox || '—',
-         car.notes || ''].forEach(val => {
-          const cell = document.createElement('div');
-          cell.className = 'cell';
-          cell.textContent = val;
-          row.appendChild(cell);
-        });
-        table.appendChild(row);
-      });
-      wrapper.appendChild(table);
-      overview.appendChild(wrapper);
-    }
+    // edit / delete
+    row.querySelector('.edit-button').addEventListener('click',ev=>{ev.stopPropagation(); startEdit(index);});
+    row.querySelector('.delete-button').addEventListener('click',ev=>{ev.stopPropagation(); doDelete(index);});
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form).entries());
-      cars.push(data);
-      saveCars();
-      form.reset();
-      render();
+    rowEl.addEventListener('click',()=>{
+      if (selectedIndex!==index){ selectedIndex=index; render(); return; }
+      if (editingIndex===index) return;
+      startEdit(index);
     });
 
-    render();
-  </script>
+    tbody.appendChild(row);
+    if (enriched._price===minPrice.v) minPrice.row=rowEl;
+    if (enriched._km===minKm.v) minKm.row=rowEl;
+  });
+
+  frag.getElementById('lowest-price').textContent = Number.isFinite(minPrice.v)?euro.format(minPrice.v):'—';
+  frag.getElementById('lowest-km').textContent = Number.isFinite(minKm.v)?`${intFmt.format(minKm.v)} km`:'—';
+  frag.getElementById('avg-price').textContent = euro.format(sumPrice/entries.length);
+
+  if (minPrice.row) minPrice.row.classList.add('highlight');
+  if (minKm.row) minKm.row.classList.add('highlight');
+
+  // selection card
+  const selBox=frag.getElementById('selected-box');
+  const selItem = (selectedIndex!==null)? items[selectedIndex] : null;
+  if (selItem){
+    const e=enrich(selItem);
+    selBox.classList.remove('hidden');
+    frag.getElementById('sel-title').textContent=`${selItem.dealer||'—'} – ${selItem.model||'Unbekanntes Modell'}`;
+    frag.getElementById('sel-sub').textContent=[selItem.class||'', selItem.gearbox||''].filter(Boolean).join(' · ');
+    frag.getElementById('sel-price').textContent=e._price?euro.format(e._price):'—';
+    frag.getElementById('sel-km').textContent=e._km?`${intFmt.format(e._km)} km`:'—';
+    frag.getElementById('sel-ez').textContent=e._ezPretty||'—';
+    frag.getElementById('sel-ps').textContent=e._ps?`${intFmt.format(e._ps)} PS`:'—';
+    frag.getElementById('sel-cons').textContent=selItem.consumption?`${selItem.consumption} l/100km`:'—';
+    frag.getElementById('sel-ppkm').textContent=Number.isFinite(e._ppkm)?euro.format(e._ppkm):'—';
+    const linkEl=frag.getElementById('sel-link');
+    if (selItem.link){ linkEl.href=selItem.link; linkEl.textContent='Zum Inserat'; linkEl.classList.remove('hidden'); }
+    else { linkEl.textContent=''; linkEl.removeAttribute('href'); linkEl.classList.add('hidden'); }
+    const notesEl=frag.getElementById('sel-notes');
+    if (selItem.notes){ notesEl.textContent=selItem.notes; notesEl.classList.remove('hidden'); } else { notesEl.textContent=''; notesEl.classList.add('hidden'); }
+    frag.getElementById('selected-update').addEventListener('click',()=>{ if(selectedIndex!==null) startEdit(selectedIndex); });
+    frag.getElementById('selected-clear').addEventListener('click',()=>{ selectedIndex=null; render(); });
+  } else {
+    selBox.classList.add('hidden');
+  }
+
+  overview.appendChild(frag);
+}
+
+/* === Form handling === */
+const submitBtn=document.getElementById('submit-button');
+const cancelEditBtn=document.getElementById('cancel-edit');
+function resetForm(){
+  form.reset(); editingIndex=null; submitBtn.textContent='Fahrzeug speichern'; cancelEditBtn.classList.add('hidden');
+}
+function fillForm(it){
+  form.elements['dealer'].value=it.dealer||'';
+  form.elements['model'].value=it.model||'';
+  form.elements['price'].value=it.price??'';
+  form.elements['registration'].value=it.registration||'';
+  form.elements['mileage'].value=it.mileage??'';
+  form.elements['power'].value=it.power??'';
+  form.elements['gearbox'].value=it.gearbox||'';
+  form.elements['consumption'].value=it.consumption??'';
+  form.elements['class'].value=it.class||'';
+  form.elements['link'].value=it.link||'';
+  form.elements['notes'].value=it.notes||'';
+}
+function startEdit(i){
+  const it=items[i]; if(!it) return;
+  editingIndex=i; selectedIndex=i; fillForm(it);
+  submitBtn.textContent='Fahrzeug aktualisieren';
+  cancelEditBtn.classList.remove('hidden');
+  render();
+  form.scrollIntoView({behavior:'smooth',block:'start'});
+  const first=form.querySelector('input,select'); if(first) first.focus();
+}
+function doDelete(i){
+  const it=items[i]; if(!it) return;
+  const msg=`Soll das Inserat "${(it.dealer||'—')} – ${(it.model||'—')}" wirklich gelöscht werden?`;
+  if(!window.confirm(msg)) return;
+  items.splice(i,1);
+  if (editingIndex!==null){ if (editingIndex===i) resetForm(); else if (editingIndex>i) editingIndex-=1; }
+  if (selectedIndex!==null){ if (selectedIndex===i) selectedIndex=null; else if (selectedIndex>i) selectedIndex-=1; }
+  saveItems(); render();
+}
+cancelEditBtn.addEventListener('click',()=>{ resetForm(); render(); });
+
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const fd=Object.fromEntries(new FormData(form).entries());
+  const obj={
+    dealer:(fd.dealer||'').trim(),
+    model:(fd.model||'').trim(),
+    price:fd.price,
+    registration:(fd.registration||'').trim(),
+    mileage:fd.mileage,
+    power:fd.power,
+    gearbox:fd.gearbox||'',
+    consumption:fd.consumption,
+    class:(fd.class||'').trim(),
+    link:(fd.link||'').trim(),
+    notes:(fd.notes||'').trim()
+  };
+  if (editingIndex!==null){ items[editingIndex]={...items[editingIndex],...obj}; }
+  else { items.push(obj); }
+  saveItems(); resetForm(); render();
+});
+
+/* === Export (TSV) === */
+function escTSV(v, {decimal=false}={}){
+  if (v===null||v===undefined) return '';
+  let s=typeof v==='number'? String(v) : String(v);
+  if (decimal) s=s.replace(/\./g,','); // für Kommazahlen
+  return s.replace(/\t/g,' ').replace(/\r?\n/g,' / ').trim();
+}
+function buildExport(){
+  if(!items.length) return '';
+  return items.map(it=>[
+    escTSV(it.dealer),
+    escTSV(it.model),
+    escTSV(it.price,{decimal:true}),
+    escTSV(it.registration),
+    escTSV(it.mileage),
+    escTSV(it.power),
+    escTSV(it.gearbox),
+    escTSV(it.consumption,{decimal:true}),
+    escTSV(it.class),
+    escTSV(it.link),
+    escTSV(it.notes)
+  ].join('\t')).join('\n');
+}
+exportBtn.addEventListener('click',()=>{
+  const content=buildExport();
+  if(!content){ alert('Es gibt keine Inserate zum Exportieren.'); return; }
+  const blob=new Blob([content],{type:'text/tab-separated-values;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const ts=new Date().toISOString().slice(0,10);
+  const a=document.createElement('a');
+  a.href=url; a.download=`autovergleich-${ts}.tsv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+/* === Import Modal === */
+function resetImport(){
+  importTA.value=''; importErr.textContent=''; importErr.classList.add('hidden');
+  importPreviewWrapper.classList.add('hidden'); importPreviewBody.innerHTML='';
+  importConfirm.disabled=true; importConfirm.textContent='Import übernehmen'; parsedImport=null;
+}
+function openImport(){ resetImport(); importOverlay.classList.remove('hidden'); setTimeout(()=>importTA.focus(),0); }
+function closeImport(){ importOverlay.classList.add('hidden'); resetImport(); }
+importOpen.addEventListener('click',openImport);
+importCancel.addEventListener('click',closeImport);
+importOverlay.addEventListener('click',e=>{ if(e.target===importOverlay) closeImport(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !importOverlay.classList.contains('hidden')) closeImport(); });
+
+function parseImport(raw){
+  const input=(typeof raw==='string')?raw:'';
+  if(!input.trim()) throw new Error('Bitte gib einen Importstring ein.');
+  const lines=input.split(/\r?\n/).map(l=>l.replace(/\r/g,'')).filter(l=>l.trim().length>0);
+  if(!lines.length) throw new Error('Der Importstring ist leer.');
+  return lines.map((line,idx)=>{
+    const vals=line.split('\t'); 
+    if (vals.length!==importFields.length)
+      throw new Error(`Zeile ${idx+1} muss genau ${importFields.length} Werte enthalten.`);
+    const [
+      dealer, model, price, registration, mileage, power, gearbox, consumption, klass, link, notes
+    ] = vals.map(v=>v.trim());
+    return {dealer, model, price, registration, mileage, power, gearbox, consumption, class:klass, link, notes};
+  });
+}
+
+function renderImportPreview(list){
+  importPreviewBody.innerHTML='';
+  const fmtNum=(n)=>Number.isFinite(n)?euro.format(n):'—';
+  const computed=list.map(e=>{
+    const price=toNum(e.price); const km=toInt(e.mileage);
+    const ppkm=(price>0&&km>0)?price/km:NaN; return {ppkm, price};
+  });
+  const validPrices=computed.map(v=>v.price).filter(Number.isFinite);
+  const avgPrice=validPrices.length? validPrices.reduce((a,b)=>a+b,0)/validPrices.length : NaN;
+
+  list.forEach((entry,i)=>{
+    if (list.length>1){
+      const headerRow=document.createElement('tr'); headerRow.className='entry-header';
+      const td=document.createElement('td'); td.colSpan=2; td.textContent=`Inserat ${i+1}`; headerRow.appendChild(td);
+      importPreviewBody.appendChild(headerRow);
+    }
+    importFields.forEach(f=>{
+      const tr=document.createElement('tr');
+      const l=document.createElement('td'); l.textContent=f.label;
+      const v=document.createElement('td'); v.textContent=entry[f.key]||'—';
+      tr.append(l,v); importPreviewBody.appendChild(tr);
+    });
+    // derived
+    const tr=document.createElement('tr'); const l=document.createElement('td'); const v=document.createElement('td');
+    l.textContent='Preis / km'; v.textContent=fmtNum(computed[i].ppkm); tr.append(l,v); importPreviewBody.appendChild(tr);
+
+    const tr2=document.createElement('tr'); const l2=document.createElement('td'); const v2=document.createElement('td');
+    l2.textContent='Preis (Vergleich Durchschnitt)'; v2.textContent=fmtNum(computed[i].price);
+    if (Number.isFinite(computed[i].price) && Number.isFinite(avgPrice) && computed[i].price<avgPrice)
+      tr2.style.backgroundColor='rgba(0,200,0,.1)';
+    tr2.append(l2,v2); importPreviewBody.appendChild(tr2);
+  });
+
+  importPreviewWrapper.classList.remove('hidden');
+}
+
+importPreviewBtn.addEventListener('click',()=>{
+  try{
+    const parsed=parseImport(importTA.value); parsedImport=parsed;
+    renderImportPreview(parsed); importErr.classList.add('hidden'); importErr.textContent='';
+    importConfirm.disabled=false; importConfirm.textContent = parsed.length>1 ? 'Inserate ersetzen' : 'Inserat importieren';
+  }catch(err){
+    parsedImport=null; importPreviewWrapper.classList.add('hidden'); importPreviewBody.innerHTML='';
+    importErr.textContent=err.message; importErr.classList.remove('hidden'); importConfirm.disabled=true; importConfirm.textContent='Import übernehmen';
+  }
+});
+importConfirm.addEventListener('click',()=>{
+  if (!Array.isArray(parsedImport) || !parsedImport.length) return;
+  const created=parsedImport.map(e=>e); // flat clone
+  if (created.length===1){ items.push(created[0]); saveItems(); render(); closeImport(); alert('1 Inserat wurde importiert.'); return; }
+  // replace all
+  items.length=0; items.push(...created); saveItems(); render(); closeImport(); alert(`${created.length} Inserate wurden importiert und vorhandene ersetzt.`);
+});
+importTA.addEventListener('input',()=>{ parsedImport=null; importConfirm.disabled=true; importPreviewWrapper.classList.add('hidden'); importPreviewBody.innerHTML=''; importErr.classList.add('hidden'); importErr.textContent=''; importConfirm.textContent='Import übernehmen'; });
+
+/* === Init === */
+resetForm();
+render();
+</script>
 </body>
 </html>
